@@ -1,0 +1,43 @@
+releaseStage: staging
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: node.kubernetes.io/instance-type
+          operator: In
+          values:
+          - t3.2xlarge
+          - t3.xlarge
+          - t3.large
+
+# ############################################################################################################################
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    cert-manager.io/cluster-issuer: letsencrypt-nginx
+
+  labels:
+    app: "staging-templateloadbalancer"
+
+  hosts:
+    - host: stag-templateloadbalancer.crytera.com
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: "staging-templateloadbalancer"
+            port:
+              name: http
+
+  tls:
+   - hosts:
+     - stag-templateloadbalancer.crytera.com
+     secretName: letsencrypt-nginx-templateloadbalancer
+# ############################################################################################################################
